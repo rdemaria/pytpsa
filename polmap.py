@@ -25,7 +25,7 @@ class polmap(dict):
 
   __setitem__=__setattr__
 
-  def __call__(self,*v,**a):
+  def eval(self,*v,**a):
     """Compose self with other using the python interpreter. The argument can be a dictionary, another polmap or a set of named arguments.
     >>> from polmap import *
     >>> p=polmap(x='1+x+y')
@@ -51,6 +51,9 @@ class polmap(dict):
     for n,v in self.items():
       out[n]=pol(v(**loc))
     return out
+
+  def __call__(self,other):
+    return other.eval(self)
 
   def __repr__(self):
     return getattr(polmap,'out')(self)

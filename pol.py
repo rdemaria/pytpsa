@@ -345,14 +345,13 @@ class pol(object):
   def __pos__(self):
     return self
 
-  def __call__(self,*args,**loc):
+  def eval(self,*args,**loc):
     if len(args)>0:
       loc.update(args[0])
     for i in self.vars:
       loc.setdefault(i,pol(i))
     loc=mydict(loc)
     return eval(self.pretty(),{},loc)
-
 
   def _pexp(self,i):
     out=[]
