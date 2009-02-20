@@ -1,0 +1,5 @@
+.*.sw?
+*.pyc
+*.pyo
+*~
+pytpsa/.git

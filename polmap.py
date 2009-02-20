@@ -49,7 +49,7 @@ class polmap(dict):
         loc[n]=pol(v)
     out=polmap()
     for n,v in self.items():
-      out[n]=pol(v(**loc))
+      out[n]=pol(v.eval(**loc))
     return out
 
   def __call__(self,other):
