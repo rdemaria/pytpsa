@@ -30,16 +30,7 @@ class dop(pol):
     if order is not None:
       self.order=order
 
-  def __call__(self,other):
-    if type(other) is pol:
-      return other.der(self)
-    elif type(other) is polmap:
-      new=polmap(other)
-      for j in new.keys():
-        new[j]=new[j].der(self)
-      return new
-
-  def __call__(self,other):
+  def _derpol(self,other):
     new=pol(order=min(self.order,other.order))
     new.vars=list(set(other.vars+self.vars))
     for i in self.coef:
@@ -52,6 +43,15 @@ class dop(pol):
           c*=normder(expj.get(k,0), expi.get(k,0))
         new.coef[newexp]=new.coef.get(newexp,0.)+c
     return new.truncate().dropneg()
+
+  def __call__(self,other):
+    if isinstance(other,pol):
+      return self._derpol(other)
+    elif isinstance(other,polmap):
+      m=polmap(other)
+      for n,v in m.items():
+        m[n]=self(v)
+      return m
 
 #  def truncate(self):
 #    return self

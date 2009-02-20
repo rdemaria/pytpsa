@@ -101,16 +101,16 @@ def isqrt(c):
   return phorner(lst,p)
 
 
-def asin_t(c):
-  """Compute ArcSin using a Taylor expansion
-    >>> from pol import *
-    >>> x,y=mkpol('x,y')
-    >>> asin(sin(.7+x+y))
-    0.7 + x + y
-  """
-  p=c.copy()
-  x=pol('x')
-  return pisqrt(1-x**2).int(x)(x=p)
+#def asin_t(c):
+#  """Compute ArcSin using a Taylor expansion
+#    >>> from pol import *
+#    >>> x,y=mkpol('x,y')
+#    >>> asin(sin(.7+x+y))
+#    0.7 + x + y
+#  """
+#  p=c.copy()
+#  x=pol('x')
+#  return pisqrt(1-x**2).int(x)(x=p)
 
 def asin(y):
   """Compute ArcSin

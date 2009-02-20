@@ -58,6 +58,20 @@ class polmap(dict):
   def __repr__(self):
     return getattr(polmap,'out')(self)
 
+  def truncate(self,order=1):
+    for n,v in self.items():
+      v.truncate(order=order)
+    return self
+
+  def float(self):
+    new=polmap(self)
+    for n,v in self.items():
+      new[n]=float(v)
+    return new
+
+  def jacobian(self):
+    return matrix([ dop(i)(self) for i in i in self])
+
   def table(self):
     """Table  print
     """
@@ -74,17 +88,6 @@ class polmap(dict):
       out.append('%s=%s' % (n,pol(v).pretty()))
     return '\n'.join(out)
 
-  def int(self,x):
-    new=polmap(self)
-    for n,v in self.items():
-      new[n]=v.int(x)
-    return new
-
-  def float(self):
-    new=polmap(self)
-    for n,v in self.items():
-      new[n]=float(v)
-    return new
 
   def __mul__(self,other):
     """Compose self with other using a fast but memory consuming algorithm.

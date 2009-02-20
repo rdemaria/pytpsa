@@ -55,7 +55,7 @@ class mydict(dict):
     else:
       return dict.__getitem__(self,k)
 
-class pol(object):
+class pol(dict):
   """ Class for multivariate polinomials
     >>> from pol import *
     >>> print pol('x**3+z-5-x**2')
@@ -84,13 +84,12 @@ class pol(object):
     """
   out='pretty'
   def __init__(self,val=None,order=None,eps=1E-13,loc={},m='eval'):
-    self.coef={}
     self.vars=[]
     self.order=1000
     self.eps=eps
     if val!=None:
       if isinstance(val,self.__class__):
-        self.coef.update(val.coef)
+        self.update(val)
         self.vars=val.vars[:]
         self.order=val.order
         self.eps=val.eps
@@ -102,23 +101,42 @@ class pol(object):
           pol.__init__(self,eval(c,globals(),l))
         elif m=='name':
           self.vars=[val]
-          self.coef[(1,)]=1.
+          self[(1,)]=1.
       else:
         self.vars=[]
-        self.coef[()]=val
+        self[()]=val
     if order is not None:
       self.order=order
 
   def zero(self):
     """Extract zero order
     """
-    return self.coef.get((0,)*len(self.vars),0.)
+    return self.get((0,)*len(self.vars),0.)
+
+  def linear(self):
+    a=[1]+[0]*(len(self.vars)-1)
+    out=[]
+    for i in self.vars:
+      out.append( self.get(tuple(a),0) )
+      a.insert(0,a.pop())
+    return out
+
+  def getlind(self,v):
+    ind=[0]*len(self.vars)
+    ind[ self.vars.index(v)]=1
+    return tuple(ind)
+
+  def getlcoef(self,v):
+    return self.get(self.getlind(v),0.)
+
+  def setlcoef(self,v,val):
+    self[self.getlind(v)]=val
 
   def separate(self):
     """Return a copy in couple of zero and high order
     """
     c=self.__class__(self)
-    a0=c.coef.pop((0,)*len(c.vars),0.)
+    a0=c.pop((0,)*len(c.vars),0.)
     return a0,c
 
   def truncate(self,order=None,eps=None):
@@ -126,9 +144,9 @@ class pol(object):
     damp the elements smaller than self.eps"""
     if not order: order=self.order
     if not eps: eps=self.eps
-    for k in self.coef.keys():
-      if sum(k)>order or abs(self.coef[k])<eps:
-        del self.coef[k]
+    for k in self.keys():
+      if sum(k)>order or abs(self[k])<eps:
+        del self[k]
     return self
 
   def const(self,vars=None):
@@ -140,21 +158,21 @@ class pol(object):
     x**3
     """
     if not vars:
-      return self.coef.get((0,)*len(self.vars),0.)
+      return self.get((0,)*len(self.vars),0.)
     else:
       c=self.__class__(self)
-      for exp in self.coef:
+      for exp in self:
         expd=dict(zip(self.vars,exp))
         if sum(expd.get(j,0) for j in vars) >0 :
-          del c.coef[exp]
+          del c[exp]
       return c
 
   def dropneg(self):
     """ Delete terms with negative exponent"""
-    for k in self.coef.keys():
+    for k in self.keys():
       for j in k:
         if j<0:
-          del self.coef[k]
+          del self[k]
           break
     return self
 
@@ -162,28 +180,37 @@ class pol(object):
     """Add a number to pol"""
     new=self.__class__(self)
     i=(0,)*len(new.vars)
-    new.coef[i]=new.coef.get(i,0.)+other
+    new[i]=new.get(i,0.)+other
     return new
 
   def mulcoef(self,other):
     """Mul coef to pol"""
     new=self.__class__(self)
-    for i in new.coef:
-      new.coef[i]*=other
+    for i in new:
+      new[i]*=other
+    return new
+
+  def reorder(self,vars):
+    new=self.__class__(order=self.order)
+    new.vars=vars
+    for exp in self:
+      expd=dict(zip(self.vars,exp))
+      newexp=tuple([expd.get(j,0) for j in new.vars])
+      new[newexp]=self[exp]
     return new
 
   def addpol(self,other):
     """Add pol to pol """
     new=self.__class__(order=min(self.order,other.order))
     new.vars=list(set(other.vars+self.vars))
-    for exp in self.coef:
+    for exp in self:
       expd=dict(zip(self.vars,exp))
       newexp=tuple([expd.get(j,0) for j in new.vars])
-      new.coef[newexp]=new.coef.get(newexp,0.)+self.coef[exp]
-    for exp in other.coef:
+      new[newexp]=new.get(newexp,0.)+self[exp]
+    for exp in other:
       expd=dict(zip(other.vars,exp))
       newexp=tuple([expd.get(j,0) for j in new.vars])
-      new.coef[newexp]=new.coef.get(newexp,0.)+other.coef[exp]
+      new[newexp]=new.get(newexp,0.)+other[exp]
     return new.truncate()
 
   def mulpol(self,other):
@@ -193,24 +220,24 @@ class pol(object):
     else:
       new=pol(order=min(self.order,other.order))
       new.vars=list(set(other.vars+self.vars))
-      for i in self.coef:
-        for j in other.coef:
-          c=self.coef[i]*other.coef[j]
+      for i in self:
+        for j in other:
+          c=self[i]*other[j]
           expi=dict(zip(self.vars,i))
           expj=dict(zip(other.vars,j))
           newexp=tuple([expi.get(k,0)+expj.get(k,0) for k in new.vars])
-          new.coef[newexp]=new.coef.get(newexp,0.)+c
+          new[newexp]=new.get(newexp,0.)+c
       return new.truncate()
 
   def fmulpol(self,other):
     """fast mul pol to pol """
     new=self.__class__(order=min(self.order,other.order))
     new.vars=self.vars[:]
-    for i in self.coef:
-      for j in other.coef:
-        c=self.coef[i]*other.coef[j]
+    for i in self:
+      for j in other:
+        c=self[i]*other[j]
         newexp=tuple([l+m for l,m in zip(i,j)])
-        new.coef[newexp]=new.coef.get(newexp,0.)+c
+        new[newexp]=new.get(newexp,0.)+c
     return new.truncate()
 
   def divterm(self,other):
@@ -223,62 +250,14 @@ class pol(object):
     new=pol(order=min(self.order,other.order))
     other=pol(other)
     new.vars=list(set(other.vars+self.vars))
-    for i in self.coef:
-      for j in other.coef:
-        c=self.coef[i]*other.coef[j]
+    for i in self:
+      for j in other:
+        c=self[i]*other[j]
         expi=dict(zip(self.vars,i))
         expj=dict(zip(other.vars,j))
         newexp=tuple([expi.get(k,0)-expj.get(k,0) for k in new.vars])
-        new.coef[newexp]=new.coef.get(newexp,0.)+c
+        new[newexp]=new.get(newexp,0.)+c
     return new.truncate().dropneg()
-
-#  def int(self,other):
-#    """Integrate and add self using other as index
-#    >>> from pol import *
-#    >>> x=pol('x')
-#    >>> print (1+x+x**2).int(x)
-#    x + 0.5*x**2 + 0.333333333333*x**3
-#    >>> print (1+x+x**2).int(1+x+x**2)
-#    1.0 + 2.0*x + 2.0*x**2 + 0.5*x**3 + 0.0833333333333*x**4
-#    """
-#    new=pol(order=min(self.order,other.order))
-#    other=pol(other)
-#    new.vars=list(set(other.vars+self.vars))
-#    for i in self.coef:
-#      for j in other.coef:
-#        c=self.coef[i]*other.coef[j]
-#        expi=dict(zip(self.vars,i))
-#        expj=dict(zip(other.vars,j))
-#        newexp=tuple([expi.get(k,0)+expj.get(k,0) for k in new.vars])
-#        for k in other.vars:
-#          c/=normint(expi.get(k,0), expj.get(k,0))
-#        new.coef[newexp]=new.coef.get(newexp,0.)+c
-#    return new.truncate()
-
-#  def der(self,other):
-#    """Derivative and add self using other as index
-#    >>> from pol import *
-#    >>> x=pol('x')
-#    >>> print (1+x-x**2).der(x)
-#    1.0 - 2.0*x
-#    >>> from funset import sin, cos
-#    >>> print (sin(x)).der(x)-cos(x)
-#    0
-#    """
-
-#    new=pol(order=min(self.order,other.order))
-#    other=pol(other)
-#    new.vars=list(set(other.vars+self.vars))
-#    for i in self.coef:
-#      for j in other.coef:
-#        c=self.coef[i]/other.coef[j]
-#        expi=dict(zip(self.vars,i))
-#        expj=dict(zip(other.vars,j))
-#        newexp=tuple([expi.get(k,0)-expj.get(k,0) for k in new.vars])
-#        for k in other.vars:
-#          c*=normder(expi.get(k,0), expj.get(k,0))
-#        new.coef[newexp]=new.coef.get(newexp,0.)+c
-#    return new.truncate()
 
   def __pow__(self,n):
     new=self.__class__(self)
@@ -385,7 +364,7 @@ class pol(object):
 
 
   def pretty(self):
-    lst=sorted([ (sum(i),i,c) for i,c in self.coef.items()])
+    lst=sorted([ (sum(i),i,c) for i,c in self.items()])
     m=[]
     for o,i,c in lst:
       i=self._pexp(i)
@@ -403,10 +382,10 @@ class pol(object):
   def table(self):
     fvar=lambda x,y:'%3s%3s' %(x,y)
     out=[['',0,0,reduce(fvar,self.vars),' o']]
-    lst=sorted([ (sum(i),i) for i in self.coef])
+    lst=sorted([ (sum(i),i) for i in self])
     rmax,cmax=0,0
     for order,exp in lst:
-      coef=str(self.coef[exp])
+      coef=str(self[exp])
       r=[coef,len(coef),coef.find('.'),reduce(fvar,exp),str(order)]
       rmax=r[1]>rmax and r[1] or rmax
       cmax=r[2]>cmax and r[2] or cmax
