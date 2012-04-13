@@ -83,9 +83,9 @@ class pol(dict):
     1j*x
     """
   out='pretty'
-  def __init__(self,val=None,order=None,eps=1E-13,loc={},m='eval'):
+  def __init__(self,val=None,order=None,eps=1E-18,loc={},m='eval'):
     self.vars=[]
-    self.order=1000
+    self.order=10
     self.eps=eps
     if val!=None:
       if isinstance(val,self.__class__):
@@ -181,14 +181,14 @@ class pol(dict):
     new=self.__class__(self)
     i=(0,)*len(new.vars)
     new[i]=new.get(i,0.)+other
-    return new
+    return new.truncate()
 
   def mulcoef(self,other):
     """Mul coef to pol"""
     new=self.__class__(self)
     for i in new:
       new[i]*=other
-    return new
+    return new.truncate()
 
   def reorder(self,vars):
     new=self.__class__(order=self.order)
@@ -247,6 +247,7 @@ class pol(dict):
     >>> print r
     1.0
     """
+    other=pol(other)
     new=pol(order=min(self.order,other.order))
     other=pol(other)
     new.vars=list(set(other.vars+self.vars))
@@ -332,6 +333,8 @@ class pol(dict):
     loc=mydict(loc)
     return eval(self.pretty(),{},loc)
 
+  __call__=eval
+
   def _pexp(self,i):
     out=[]
     for j in range(len(i)):
@@ -347,7 +350,7 @@ class pol(dict):
       if abs(c.imag)<self.eps:
         return self._pcoeff(c.real,i)
       else:
-        c=str(c)
+        c='+ '+str(c)
     elif isinstance(c,float):
       sign=c<0 and '-' or '+'
       if abs(c-1.0)<self.eps and i:
@@ -373,7 +376,7 @@ class pol(dict):
     if m:
       m=' '.join(m)
       if m.startswith('+ '):
-        return m[2:]
+        return '  '+m[2:]
       else:
         return m
     else:

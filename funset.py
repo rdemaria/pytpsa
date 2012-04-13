@@ -6,6 +6,14 @@ from pol import pol, phorner
 
 pi=math.pi
 
+""" The idea is that you evaluate a+x being x a small quantity,
+    then you rewrite f(a+x) so that you have a combination of
+    g_i(a) and g_k(x h_l(a) ).
+    g_i(a) and h_l(a) can be evaluated exactly by usual math libraries
+    g_k(x) because are proportianal to x are well approximated
+    by a taylor expansion.
+"""
+
 
 def sqrt(c):
   """Square root of a polynomial
@@ -24,6 +32,7 @@ def sqrt(c):
 
 def exp(c):
   """Exponential of a polynomial
+    exp(a+x) = exp(a)exp(x)
     >>> from pol import *
     >>> print log(exp(pol('1+x')))
     1.0 + x
@@ -36,7 +45,8 @@ def exp(c):
   return phorner(lst,p)
 
 def log(c):
-  """Logarith of a polynomial
+  """Logarithm of a polynomial
+    log(a+x)=log(a)-log(1+x/a)
     >>> from pol import *
     >>> print log(exp(pol('1+x')))
     1.0 + x
@@ -49,6 +59,9 @@ def log(c):
   return phorner(lst,p)
 
 def sin(c):
+  """
+  sin(a+x)= sin(a) cos(x) + cos(a) sin(x)
+  """
   if not isinstance(c,pol): return math.sin(c)
   a0,p=c.separate();
   lst=[math.sin(a0),math.cos(a0)]
@@ -57,6 +70,9 @@ def sin(c):
   return phorner(lst,p)
 
 def cos(c):
+  """
+  cos(a+x)= cos(a) sin(x) - sin(a) cos(x)
+  """
   if not isinstance(c,pol): return math.cos(c)
   a0,p=c.separate();
   lst=[math.cos(a0),-math.sin(a0)]

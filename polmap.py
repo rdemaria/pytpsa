@@ -19,6 +19,18 @@ class polmap(dict):
     for k,v in self.items():
       self[k]=pol(v)
 
+  def copy(self):
+    return polmap(self)
+
+  def vars(self):
+    return self[self.keys()[0]].vars
+
+  def reorder(self,vars):
+    vars=list(vars)
+    for k,v in self.items():
+      self[k]=pol(v).reorder(vars)
+    return self
+
   def __setattr__(self,k,v):
     dict.__setitem__(self,k,v)
     dict.__setattr__(self,k,v)
@@ -52,8 +64,7 @@ class polmap(dict):
       out[n]=pol(v.eval(**loc))
     return out
 
-  def __call__(self,other):
-    return other.eval(self)
+  __call__ = eval
 
   def __repr__(self):
     return getattr(polmap,'out')(self)
@@ -98,8 +109,28 @@ class polmap(dict):
     >>> print p*p
     x=3.0 + 3.0*x + 4.0*x**2 + 2.0*x**3 + x**4
     """
+    if isinstance(other,pol):
+      return other.eval(self)
+    elif isinstance(other,float):
+      new=polmap(self)
+      for i in other.keys():
+        new[i]=self[i]+other
+      return new
+    else:
+      return compose(self,other)
 
-    return compose(self,other)
+  def __rmul__(self,other):
+    new=polmap(self)
+    for i in self.keys():
+      new[i]=self[i]*other
+    return new
+
+  def __radd__(self,other):
+    new=polmap(self)
+    for i in self.keys():
+      new[i]=self[i]+other
+    return new
+
 
   def __pow__(self,other):
     """ Return the power of a map defined as a sequence of composition
@@ -166,6 +197,7 @@ class polmap(dict):
     det=a*d-b*c
     return [[d/det,-b/det],[-c/det,a/det]]
 
+
   def trace(self):
     vars=self.keys()
     return [self[i].divterm(i)  for i in vars]
@@ -224,7 +256,7 @@ def compose(a,b):
     tempvalues[i]=b[i]
   for n,i in a.items(): # for each name,pol in map
     new=pol(0) # initialize new pol
-    for j,c in i.coef.items(): # for each mon in pol
+    for j,c in i.items(): # for each mon in pol
       m=[] # prod vector
       for k in range(len(j)): # expand powers
         vv=i.vars[k] # mon var
@@ -257,5 +289,3 @@ def compose(a,b):
 
 def idmap(vars):
   return polmap([(i,i) for i in vars])
-
-
