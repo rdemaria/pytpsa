@@ -27,7 +27,7 @@ def sqrt(c):
   a0,p=c.separate(); p/=a0
   lst=[math.sqrt(a0)]
   for n in range(1,c.order+1):
-    lst.append(-lst[-1]/a0/2/n*(2*n-3))
+    lst.append(-lst[-1]/2/n*(2*n-3))
   return phorner(lst,p)
 
 def exp(c):
