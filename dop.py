@@ -34,14 +34,14 @@ class dop(pol):
     new=pol(order=min(self.order,other.order))
     new.vars=list(set(other.vars+self.vars))
     for i in self.coef:
-      for j in other.coef:
-        c=self.coef[i]*other.coef[j]
+      for j in other:
+        c=self.coef[i]*other[j]
         expi=dict(zip(self.vars,i))
         expj=dict(zip(other.vars,j))
         newexp=tuple([-expi.get(k,0)+expj.get(k,0) for k in new.vars])
         for k in self.vars:
           c*=normder(expj.get(k,0), expi.get(k,0))
-        new.coef[newexp]=new.coef.get(newexp,0.)+c
+        new[newexp]=new.get(newexp,0.)+c
     return new.truncate().dropneg()
 
   def __call__(self,other):
@@ -67,4 +67,4 @@ def pop(h,vars):
     out+=dop(x)*(-dop(p)(h))+dop(p)*dop(x)(h)
   return out
 
-  
+
