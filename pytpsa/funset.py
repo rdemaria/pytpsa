@@ -2,7 +2,7 @@
 #All rights reserved.
 
 import cmath as math
-from pol import pol, phorner
+from .pol import pol, phorner
 
 pi=math.pi
 

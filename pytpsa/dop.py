@@ -2,8 +2,8 @@
 #All rights reserved.
 
 
-from pol import pol, normder
-from polmap import polmap
+from .pol import pol, normder
+from .polmap import polmap
 
 
 class dop(pol):

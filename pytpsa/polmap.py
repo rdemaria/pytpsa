@@ -1,7 +1,7 @@
 #Copyright (c) 2008, Riccardo De Maria
 #All rights reserved.
 
-from pol import *
+from .pol import *
 
 class polmap(dict):
   """

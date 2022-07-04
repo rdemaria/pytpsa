@@ -1,12 +1,12 @@
 #Copyright (c) 2008, Riccardo De Maria
 #All rights reserved.
 
-from polmap import *
-from funset import *
-from dop import *
-from mapfunc import *
-#from lintrack import *
-#from lie import *
+from .polmap import *
+from .funset import *
+from .dop import *
+from .mapfunc import *
+from .lintrack import *
+from .lie import *
 
 
 if __name__=='__main__':
