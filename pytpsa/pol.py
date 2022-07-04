@@ -2,6 +2,7 @@
 #All rights reserved.
 
 import cmath as math
+from functools import reduce
 
 pi=math.pi
 
@@ -144,7 +145,7 @@ class pol(dict):
     damp the elements smaller than self.eps"""
     if not order: order=self.order
     if not eps: eps=self.eps
-    for k in self.keys():
+    for k in list(self.keys()):
       if sum(k)>order or abs(self[k])<eps:
         del self[k]
     return self
@@ -310,13 +311,13 @@ class pol(dict):
   def __rsub__(self,other):
     return (-self).addcoef(other)
 
-  def __div__(self,other):
+  def __truediv__(self,other):
     if isinstance(other,pol):
       return self.mulpol(pinv(other))
     else:
       return self.mulcoef(1/other)
 
-  def __rdiv__(self,other):
+  def __rtruediv__(self,other):
     return pinv(self).mulcoef(other)
 
   def __neg__(self):

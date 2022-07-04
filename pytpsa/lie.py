@@ -1,8 +1,8 @@
 #Copyright (c) 2008, Riccardo De Maria
 #All rights reserved.
 
-from polmap import *
-from pol import *
+from .polmap import *
+from .pol import *
 
 
 def Jmat(vars):

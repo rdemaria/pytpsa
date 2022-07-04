@@ -1,3 +1,5 @@
+from pytpsa import *
+
 # definition
 x=pol('x')
 p=pol('p')

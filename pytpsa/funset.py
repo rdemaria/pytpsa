@@ -71,7 +71,7 @@ def sin(c):
 
 def cos(c):
   """
-  cos(a+x)= cos(a) Cos(x) - sin(a) sin(x)
+  cos(a+x)= cos(a) cos(x) - sin(a) sin(x)
   """
   if not isinstance(c,pol): return math.cos(c)
   a0,p=c.separate();
