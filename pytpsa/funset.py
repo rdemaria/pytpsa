@@ -1,7 +1,7 @@
 #Copyright (c) 2008, Riccardo De Maria
 #All rights reserved.
 
-import cmath as math
+import math
 from .pol import pol, phorner
 
 pi=math.pi

@@ -1,4 +1,7 @@
 from pytpsa import *
+c=pol('4+x',order=3)
+sqrt(c)
+
 
 # definition
 x=pol('x')
